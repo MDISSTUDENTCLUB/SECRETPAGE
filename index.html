@@ -45,31 +45,30 @@
   };
 
   // Initialize Firebase
-  const app = firebase.initializeApp(firebaseConfig);
-  const db = firebase.firestore();
-</script>
-    <script>
-        document.getElementById('postForm').addEventListener('submit', async function(event) {
-    event.preventDefault();
-    const postInput = document.getElementById('postInput');
-    const postText = postInput.value.trim();
-    if (postText) {
+  firebase.initializeApp(firebaseConfig).then(() => {
+    const db = firebase.firestore();
+
+    document.getElementById('postForm').addEventListener('submit', async function(event) {
+      event.preventDefault();
+      const postInput = document.getElementById('postInput');
+      const postText = postInput.value.trim();
+      if (postText) {
         // Save post to Firestore
         await db.collection('posts').add({
-            text: postText,
-            timestamp: firebase.firestore.FieldValue.serverTimestamp()
+          text: postText,
+          timestamp: firebase.firestore.FieldValue.serverTimestamp()
         });
 
         postInput.value = '';
         loadPosts(); // Load posts after submission
-    }
-});
+      }
+    });
 
-async function loadPosts() {
-    const postsSection = document.getElementById('postsSection');
-    postsSection.innerHTML = ''; // Clear existing posts
-    const snapshot = await db.collection('posts').orderBy('timestamp', 'desc').get();
-    snapshot.forEach(doc => {
+    async function loadPosts() {
+      const postsSection = document.getElementById('postsSection');
+      postsSection.innerHTML = ''; // Clear existing posts
+      const snapshot = await db.collection('posts').orderBy('timestamp', 'desc').get();
+      snapshot.forEach(doc => {
         const newPost = document.createElement('div');
         newPost.className = 'bg-white p-6 rounded-lg shadow-md mb-4';
         newPost.innerHTML = `
@@ -77,11 +76,12 @@ async function loadPosts() {
             <div class="text-right text-gray-500 text-sm">Posted at ${new Date(doc.data().timestamp.toMillis()).toLocaleString()}</div>
         `;
         postsSection.prepend(newPost);
-    });
-}
+      });
+    }
 
-// Load posts on page load
-window.onload = loadPosts;
-    </script>
+    // Load posts on page load
+    loadPosts();
+  });
+</script>
 </body>
 </html>
